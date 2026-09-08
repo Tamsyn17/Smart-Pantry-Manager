@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,11 +18,15 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
+    private boolean isEditMode = false;
+    private int itemId = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit_ingredient);
 
+        TextView tvTitle = findViewById(R.id.tvTitle);
         etName = findViewById(R.id.etName);
         etQuantity = findViewById(R.id.etQuantity);
         etUnit = findViewById(R.id.etUnit);
@@ -30,6 +35,26 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         Button btnSave = findViewById(R.id.btnSave);
 
         databaseHelper = new DatabaseHelper(this);
+
+        if (getIntent().hasExtra("item_id")) {
+
+            isEditMode = true;
+
+            itemId = getIntent().getIntExtra("item_id", -1);
+
+            String name = getIntent().getStringExtra("item_name");
+            double quantity = getIntent().getDoubleExtra("item_quantity", 0);
+            String unit = getIntent().getStringExtra("item_unit");
+            String expiryDate = getIntent().getStringExtra("item_expiry");
+
+            tvTitle.setText("Edit Pantry Ingredient");
+            btnSave.setText("Update Ingredient");
+
+            etName.setText(name);
+            etQuantity.setText(String.valueOf(quantity));
+            etUnit.setText(unit);
+            etExpiryDate.setText(expiryDate);
+        }
 
         btnSave.setOnClickListener(v -> saveIngredient());
     }
@@ -75,30 +100,66 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             return;
         }
 
-        PantryItem item = new PantryItem(
-                name,
-                quantity,
-                unit,
-                expiryDate
-        );
+        if (isEditMode) {
 
-        long result = databaseHelper.addPantryItem(item);
+            PantryItem item = new PantryItem(
+                    itemId,
+                    name,
+                    quantity,
+                    unit,
+                    expiryDate
+            );
 
-        if (result != -1) {
-            Toast.makeText(
-                    this,
-                    "Ingredient saved successfully",
-                    Toast.LENGTH_SHORT
-            ).show();
+            int rowsUpdated = databaseHelper.updatePantryItem(item);
 
-            finish();
+            if (rowsUpdated > 0) {
+
+                Toast.makeText(
+                        this,
+                        "Ingredient updated successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Failed to update ingredient",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
 
         } else {
-            Toast.makeText(
-                    this,
-                    "Failed to save ingredient",
-                    Toast.LENGTH_SHORT
-            ).show();
+
+            PantryItem item = new PantryItem(
+                    name,
+                    quantity,
+                    unit,
+                    expiryDate
+            );
+
+            long result = databaseHelper.addPantryItem(item);
+
+            if (result != -1) {
+
+                Toast.makeText(
+                        this,
+                        "Ingredient saved successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Failed to save ingredient",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
         }
     }
 }

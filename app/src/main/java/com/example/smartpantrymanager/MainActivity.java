@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         List<PantryItem> pantryItems =
                 databaseHelper.getAllPantryItems();
 
-        pantryAdapter = new PantryAdapter(pantryItems);
+        pantryAdapter = new PantryAdapter(pantryItems, this);
 
         recyclerViewPantry.setAdapter(pantryAdapter);
     }
