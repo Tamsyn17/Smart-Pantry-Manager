@@ -22,13 +22,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerViewPantry = findViewById(R.id.recyclerViewPantry);
-        Button btnAddIngredient = findViewById(R.id.btnAddIngredient);
+
+        Button btnSuggestedRecipes =
+                findViewById(R.id.btnSuggestedRecipes);
+
+        Button btnAddIngredient =
+                findViewById(R.id.btnAddIngredient);
 
         databaseHelper = new DatabaseHelper(this);
 
         recyclerViewPantry.setLayoutManager(
                 new LinearLayoutManager(this)
         );
+
+        btnSuggestedRecipes.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+
+            startActivity(intent);
+        });
 
         btnAddIngredient.setOnClickListener(v -> {
 
