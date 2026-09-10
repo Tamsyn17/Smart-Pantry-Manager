@@ -9,6 +9,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class AddEditIngredientActivity extends AppCompatActivity {
 
     private EditText etName;
@@ -100,6 +104,12 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             return;
         }
 
+        if (!expiryDate.isEmpty() && !isValidDate(expiryDate)) {
+            etExpiryDate.setError("Use date format yyyy-MM-dd");
+            etExpiryDate.requestFocus();
+            return;
+        }
+
         if (isEditMode) {
 
             PantryItem item = new PantryItem(
@@ -110,7 +120,8 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                     expiryDate
             );
 
-            int rowsUpdated = databaseHelper.updatePantryItem(item);
+            int rowsUpdated =
+                    databaseHelper.updatePantryItem(item);
 
             if (rowsUpdated > 0) {
 
@@ -140,7 +151,8 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                     expiryDate
             );
 
-            long result = databaseHelper.addPantryItem(item);
+            long result =
+                    databaseHelper.addPantryItem(item);
 
             if (result != -1) {
 
@@ -160,6 +172,28 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                 ).show();
             }
+        }
+    }
+
+    private boolean isValidDate(String dateText) {
+
+        SimpleDateFormat dateFormat =
+                new SimpleDateFormat(
+                        "yyyy-MM-dd",
+                        Locale.getDefault()
+                );
+
+        dateFormat.setLenient(false);
+
+        try {
+
+            dateFormat.parse(dateText);
+
+            return true;
+
+        } catch (ParseException e) {
+
+            return false;
         }
     }
 }
