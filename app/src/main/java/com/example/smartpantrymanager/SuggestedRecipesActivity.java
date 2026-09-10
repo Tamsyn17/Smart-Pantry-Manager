@@ -1,7 +1,8 @@
 package com.example.smartpantrymanager;
 
 import android.os.Bundle;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import java.util.Locale;
 public class SuggestedRecipesActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewRecipes;
+    private TextView tvEmptyRecipes;
     private RecipeAdapter recipeAdapter;
     private DatabaseHelper databaseHelper;
 
@@ -23,6 +25,7 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_suggested_recipes);
 
         recyclerViewRecipes = findViewById(R.id.recyclerViewRecipes);
+        tvEmptyRecipes = findViewById(R.id.tvEmptyRecipes);
 
         databaseHelper = new DatabaseHelper(this);
 
@@ -51,19 +54,21 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
             }
         }
 
+        if (suggestedRecipes.isEmpty()) {
+
+            recyclerViewRecipes.setVisibility(View.GONE);
+            tvEmptyRecipes.setVisibility(View.VISIBLE);
+
+        } else {
+
+            recyclerViewRecipes.setVisibility(View.VISIBLE);
+            tvEmptyRecipes.setVisibility(View.GONE);
+        }
+
         recipeAdapter =
                 new RecipeAdapter(suggestedRecipes);
 
         recyclerViewRecipes.setAdapter(recipeAdapter);
-
-        if (suggestedRecipes.isEmpty()) {
-
-            Toast.makeText(
-                    this,
-                    "No recipes can be made with your current pantry",
-                    Toast.LENGTH_LONG
-            ).show();
-        }
     }
 
     private boolean canMakeRecipe(
@@ -159,7 +164,6 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
                         .replace("-", " ")
                         .replaceAll("\\s+", " ");
 
-        // Common irregular/simple plural forms
         if (normalized.equals("tomatoes")) {
             return "tomato";
         }
