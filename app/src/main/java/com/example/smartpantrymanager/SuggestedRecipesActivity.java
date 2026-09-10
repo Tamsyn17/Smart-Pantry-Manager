@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SuggestedRecipesActivity extends AppCompatActivity {
 
@@ -76,30 +77,61 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
 
         for (RecipeIngredient required : requiredIngredients) {
 
-            boolean ingredientFound = false;
-
-            for (PantryItem pantryItem : pantryItems) {
-
-                if (ingredientNamesMatch(
-                        required.getIngredientName(),
-                        pantryItem.getName())) {
-
-                    if (hasEnoughQuantity(
-                            pantryItem,
-                            required)) {
-
-                        ingredientFound = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!ingredientFound) {
+            if (!hasRequiredIngredient(required, pantryItems)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private boolean hasRequiredIngredient(
+            RecipeIngredient required,
+            List<PantryItem> pantryItems) {
+
+        String requiredUnit =
+                normalizeUnit(required.getUnit());
+
+        String requiredUnitType =
+                getUnitType(requiredUnit);
+
+        double requiredQuantity =
+                convertToBaseUnit(
+                        required.getQuantity(),
+                        requiredUnit
+                );
+
+        double totalAvailableQuantity = 0;
+
+        for (PantryItem pantryItem : pantryItems) {
+
+            if (!ingredientNamesMatch(
+                    required.getIngredientName(),
+                    pantryItem.getName())) {
+
+                continue;
+            }
+
+            String pantryUnit =
+                    normalizeUnit(pantryItem.getUnit());
+
+            String pantryUnitType =
+                    getUnitType(pantryUnit);
+
+            if (!requiredUnitType.equals(pantryUnitType)) {
+                continue;
+            }
+
+            double pantryQuantity =
+                    convertToBaseUnit(
+                            pantryItem.getQuantity(),
+                            pantryUnit
+                    );
+
+            totalAvailableQuantity += pantryQuantity;
+        }
+
+        return totalAvailableQuantity >= requiredQuantity;
     }
 
     private boolean ingredientNamesMatch(
@@ -122,85 +154,54 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         }
 
         String normalized =
-                name.trim().toLowerCase();
+                name.trim()
+                        .toLowerCase(Locale.ROOT)
+                        .replace("-", " ")
+                        .replaceAll("\\s+", " ");
+
+        // Common irregular/simple plural forms
+        if (normalized.equals("tomatoes")) {
+            return "tomato";
+        }
+
+        if (normalized.equals("potatoes")) {
+            return "potato";
+        }
 
         if (normalized.endsWith("ies")
                 && normalized.length() > 3) {
 
-            normalized =
-                    normalized.substring(
-                            0,
-                            normalized.length() - 3
-                    ) + "y";
+            return normalized.substring(
+                    0,
+                    normalized.length() - 3
+            ) + "y";
+        }
 
-        } else if (normalized.endsWith("es")
+        if (normalized.endsWith("es")
                 && normalized.length() > 2) {
 
-            if (normalized.endsWith("oes")) {
-
-                normalized =
-                        normalized.substring(
-                                0,
-                                normalized.length() - 2
-                        );
-
-            } else if (normalized.endsWith("ches")
+            if (normalized.endsWith("ches")
                     || normalized.endsWith("shes")
                     || normalized.endsWith("xes")) {
 
-                normalized =
-                        normalized.substring(
-                                0,
-                                normalized.length() - 2
-                        );
+                return normalized.substring(
+                        0,
+                        normalized.length() - 2
+                );
             }
+        }
 
-        } else if (normalized.endsWith("s")
+        if (normalized.endsWith("s")
+                && !normalized.endsWith("ss")
                 && normalized.length() > 1) {
 
-            normalized =
-                    normalized.substring(
-                            0,
-                            normalized.length() - 1
-                    );
+            return normalized.substring(
+                    0,
+                    normalized.length() - 1
+            );
         }
 
         return normalized;
-    }
-
-    private boolean hasEnoughQuantity(
-            PantryItem pantryItem,
-            RecipeIngredient required) {
-
-        String pantryUnit =
-                normalizeUnit(pantryItem.getUnit());
-
-        String recipeUnit =
-                normalizeUnit(required.getUnit());
-
-        double pantryQuantity =
-                convertToBaseUnit(
-                        pantryItem.getQuantity(),
-                        pantryUnit
-                );
-
-        double requiredQuantity =
-                convertToBaseUnit(
-                        required.getQuantity(),
-                        recipeUnit
-                );
-
-        String pantryUnitType =
-                getUnitType(pantryUnit);
-
-        String recipeUnitType =
-                getUnitType(recipeUnit);
-
-        if (!pantryUnitType.equals(recipeUnitType)) {
-            return false;
-        }
-
-        return pantryQuantity >= requiredQuantity;
     }
 
     private String normalizeUnit(String unit) {
@@ -210,36 +211,39 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         }
 
         String normalized =
-                unit.trim().toLowerCase();
+                unit.trim().toLowerCase(Locale.ROOT);
 
         switch (normalized) {
 
+            case "g":
             case "gram":
             case "grams":
-            case "g":
                 return "g";
 
+            case "kg":
+            case "kgs":
             case "kilogram":
             case "kilograms":
-            case "kg":
                 return "kg";
 
+            case "ml":
             case "millilitre":
             case "millilitres":
             case "milliliter":
             case "milliliters":
-            case "ml":
                 return "ml";
 
+            case "l":
             case "litre":
             case "litres":
             case "liter":
             case "liters":
-            case "l":
                 return "l";
 
             case "piece":
             case "pieces":
+            case "pc":
+            case "pcs":
                 return "piece";
 
             case "slice":
