@@ -31,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
         );
 
         btnAddIngredient.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     MainActivity.this,
                     AddEditIngredientActivity.class
             );
+
             startActivity(intent);
         });
     }
@@ -51,7 +53,10 @@ public class MainActivity extends AppCompatActivity {
         List<PantryItem> pantryItems =
                 databaseHelper.getAllPantryItems();
 
-        pantryAdapter = new PantryAdapter(pantryItems, this);
+        pantryAdapter = new PantryAdapter(
+                pantryItems,
+                this
+        );
 
         recyclerViewPantry.setAdapter(pantryAdapter);
     }
