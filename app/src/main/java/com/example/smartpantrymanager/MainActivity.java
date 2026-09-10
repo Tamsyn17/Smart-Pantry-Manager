@@ -2,11 +2,15 @@ package com.example.smartpantrymanager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,17 +28,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbarMain = findViewById(R.id.toolbarMain);
+        setSupportActionBar(toolbarMain);
+
         recyclerViewPantry = findViewById(R.id.recyclerViewPantry);
         tvEmptyPantry = findViewById(R.id.tvEmptyPantry);
 
-        Button btnSettings =
-                findViewById(R.id.btnSettings);
-
-        Button btnSuggestedRecipes =
-                findViewById(R.id.btnSuggestedRecipes);
-
-        Button btnAddIngredient =
-                findViewById(R.id.btnAddIngredient);
+        Button btnSettings = findViewById(R.id.btnSettings);
+        Button btnSuggestedRecipes = findViewById(R.id.btnSuggestedRecipes);
+        Button btnAddIngredient = findViewById(R.id.btnAddIngredient);
 
         databaseHelper = new DatabaseHelper(this);
 
@@ -43,32 +45,26 @@ public class MainActivity extends AppCompatActivity {
         );
 
         btnSettings.setOnClickListener(v -> {
-
             Intent intent = new Intent(
                     MainActivity.this,
                     SettingsActivity.class
             );
-
             startActivity(intent);
         });
 
         btnSuggestedRecipes.setOnClickListener(v -> {
-
             Intent intent = new Intent(
                     MainActivity.this,
                     SuggestedRecipesActivity.class
             );
-
             startActivity(intent);
         });
 
         btnAddIngredient.setOnClickListener(v -> {
-
             Intent intent = new Intent(
                     MainActivity.this,
                     AddEditIngredientActivity.class
             );
-
             startActivity(intent);
         });
     }
@@ -76,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         loadPantryItems();
     }
 
@@ -96,11 +91,54 @@ public class MainActivity extends AppCompatActivity {
             tvEmptyPantry.setVisibility(View.GONE);
         }
 
-        pantryAdapter = new PantryAdapter(
-                pantryItems,
-                this
-        );
+        pantryAdapter =
+                new PantryAdapter(pantryItems, this);
 
         recyclerViewPantry.setAdapter(pantryAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(
+                R.menu.main_menu,
+                menu
+        );
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(
+            @NonNull MenuItem item) {
+
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.menuPantry) {
+
+            return true;
+
+        } else if (itemId == R.id.menuSuggestedRecipes) {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+
+            startActivity(intent);
+            return true;
+
+        } else if (itemId == R.id.menuSettings) {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SettingsActivity.class
+            );
+
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
