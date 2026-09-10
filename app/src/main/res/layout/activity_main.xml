@@ -22,6 +22,13 @@
         android:layout_weight="1" />
 
     <Button
+        android:id="@+id/btnSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Settings" />
+
+    <Button
         android:id="@+id/btnSuggestedRecipes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
