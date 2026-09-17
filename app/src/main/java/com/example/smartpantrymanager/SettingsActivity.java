@@ -1,9 +1,11 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +31,12 @@ public class SettingsActivity extends AppCompatActivity {
         btnSaveSettings =
                 findViewById(R.id.btnSaveSettings);
 
+        TextView tvBottomPantry =
+                findViewById(R.id.tvBottomPantry);
+
+        TextView tvBottomRecipes =
+                findViewById(R.id.tvBottomRecipes);
+
         sharedPreferences =
                 getSharedPreferences(
                         PREFS_NAME,
@@ -37,8 +45,38 @@ public class SettingsActivity extends AppCompatActivity {
 
         loadSettings();
 
+        // Save settings
         btnSaveSettings.setOnClickListener(v -> {
             saveSettings();
+        });
+
+        // Bottom navigation - Pantry
+        tvBottomPantry.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            SettingsActivity.this,
+                            MainActivity.class
+                    );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+            );
+
+            startActivity(intent);
+            finish();
+        });
+
+        // Bottom navigation - Recipes
+        tvBottomRecipes.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            SettingsActivity.this,
+                            SuggestedRecipesActivity.class
+                    );
+
+            startActivity(intent);
         });
     }
 
@@ -79,7 +117,9 @@ public class SettingsActivity extends AppCompatActivity {
         try {
 
             warningDays =
-                    Integer.parseInt(warningDaysText);
+                    Integer.parseInt(
+                            warningDaysText
+                    );
 
         } catch (NumberFormatException e) {
 

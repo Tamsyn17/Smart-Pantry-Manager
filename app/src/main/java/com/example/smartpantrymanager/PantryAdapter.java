@@ -3,9 +3,12 @@ package com.example.smartpantrymanager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +33,7 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
     private static final String KEY_EXPIRY_WARNING_DAYS = "expiry_warning_days";
 
     public PantryAdapter(List<PantryItem> pantryItems, Context context) {
+
         this.pantryItems = pantryItems;
 
         this.databaseHelper =
@@ -67,6 +71,47 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
         PantryItem item =
                 pantryItems.get(position);
 
+        // -----------------------------------------
+        // INGREDIENT IMAGE
+        // -----------------------------------------
+
+        String ingredientName =
+                item.getName()
+                        .trim()
+                        .toLowerCase(Locale.ROOT);
+
+        if (ingredientName.equals("butter")) {
+
+            holder.imgIngredient.setImageResource(
+                    R.drawable.butter
+            );
+
+        } else if (ingredientName.equals("egg")
+                || ingredientName.equals("eggs")) {
+
+            holder.imgIngredient.setImageResource(
+                    R.drawable.eggs
+            );
+
+        } else if (ingredientName.equals("rice")) {
+
+            holder.imgIngredient.setImageResource(
+                    R.drawable.rice
+            );
+
+        } else {
+
+            // Default image for ingredients
+            // that do not have their own picture yet
+            holder.imgIngredient.setImageResource(
+                    R.drawable.ic_launcher_foreground
+            );
+        }
+
+        // -----------------------------------------
+        // INGREDIENT INFORMATION
+        // -----------------------------------------
+
         holder.tvIngredientName.setText(
                 item.getName()
         );
@@ -77,14 +122,19 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
                         + " "
                         + item.getUnit();
 
-        holder.tvQuantity.setText(quantityText);
+        holder.tvQuantity.setText(
+                quantityText
+        );
 
         displayExpiryStatus(
                 holder,
                 item
         );
 
-        // Normal tap = edit ingredient
+        // -----------------------------------------
+        // NORMAL TAP = EDIT INGREDIENT
+        // -----------------------------------------
+
         holder.itemView.setOnClickListener(v -> {
 
             Context context =
@@ -123,7 +173,10 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
             context.startActivity(intent);
         });
 
-        // Long press = delete ingredient
+        // -----------------------------------------
+        // LONG PRESS = DELETE INGREDIENT
+        // -----------------------------------------
+
         holder.itemView.setOnLongClickListener(v -> {
 
             Context context =
@@ -189,6 +242,10 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
         });
     }
 
+    // -----------------------------------------
+    // EXPIRY STATUS
+    // -----------------------------------------
+
     private void displayExpiryStatus(
             PantryViewHolder holder,
             PantryItem item) {
@@ -203,8 +260,19 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
                     "Expiry: Not specified"
             );
 
+            setStatusBadge(
+                    holder,
+                    "No expiry date",
+                    "#746E7C",
+                    "#F3EEFA"
+            );
+
             return;
         }
+
+        holder.tvExpiryDate.setText(
+                "Expiry: " + expiryDate
+        );
 
         int warningDays =
                 sharedPreferences.getInt(
@@ -217,50 +285,90 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
                         expiryDate
                 );
 
-        String expiryText;
-
         if (daysUntilExpiry == Long.MIN_VALUE) {
 
-            expiryText =
-                    "Expiry: "
-                            + expiryDate
-                            + "\nStatus: Invalid expiry date";
+            setStatusBadge(
+                    holder,
+                    "Invalid date",
+                    "#B85C5C",
+                    "#FDECEC"
+            );
 
         } else if (daysUntilExpiry < 0) {
 
-            expiryText =
-                    "Expiry: "
-                            + expiryDate
-                            + "\nStatus: Expired";
+            setStatusBadge(
+                    holder,
+                    "!  Expired",
+                    "#B85C5C",
+                    "#FDECEC"
+            );
 
         } else if (daysUntilExpiry == 0) {
 
-            expiryText =
-                    "Expiry: "
-                            + expiryDate
-                            + "\nStatus: Expires today";
+            setStatusBadge(
+                    holder,
+                    "!  Expires today",
+                    "#B85C5C",
+                    "#FDECEC"
+            );
 
         } else if (daysUntilExpiry <= warningDays) {
 
-            expiryText =
-                    "Expiry: "
-                            + expiryDate
-                            + "\nStatus: Expiring soon ("
-                            + daysUntilExpiry
-                            + " days remaining)";
+            setStatusBadge(
+                    holder,
+                    "◷  Expiring soon",
+                    "#C28B3C",
+                    "#FFF3DF"
+            );
 
         } else {
 
-            expiryText =
-                    "Expiry: "
-                            + expiryDate
-                            + "\nStatus: Fresh";
+            setStatusBadge(
+                    holder,
+                    "🌿  Fresh",
+                    "#4E8B72",
+                    "#E8F5EE"
+            );
         }
+    }
 
-        holder.tvExpiryDate.setText(
-                expiryText
+    // -----------------------------------------
+    // STATUS BADGE DESIGN
+    // -----------------------------------------
+
+    private void setStatusBadge(
+            PantryViewHolder holder,
+            String text,
+            String textColor,
+            String backgroundColor) {
+
+        holder.tvExpiryStatus.setText(
+                text
+        );
+
+        holder.tvExpiryStatus.setTextColor(
+                Color.parseColor(textColor)
+        );
+
+        GradientDrawable badgeBackground =
+                new GradientDrawable();
+
+        badgeBackground.setColor(
+                Color.parseColor(backgroundColor)
+        );
+
+        badgeBackground.setCornerRadius(
+                30f
+        );
+
+        holder.tvExpiryStatus.setBackground(
+                badgeBackground
         );
     }
+
+    // -----------------------------------------
+    // CALCULATE DAYS UNTIL EXPIRY
+    // -----------------------------------------
 
     private long calculateDaysUntilExpiry(
             String expiryDate) {
@@ -311,20 +419,32 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
 
     @Override
     public int getItemCount() {
+
         return pantryItems.size();
     }
+
+    // -----------------------------------------
+    // VIEW HOLDER
+    // -----------------------------------------
 
     public static class PantryViewHolder
             extends RecyclerView.ViewHolder {
 
+        ImageView imgIngredient;
         TextView tvIngredientName;
         TextView tvQuantity;
         TextView tvExpiryDate;
+        TextView tvExpiryStatus;
 
         public PantryViewHolder(
                 @NonNull View itemView) {
 
             super(itemView);
+
+            imgIngredient =
+                    itemView.findViewById(
+                            R.id.imgIngredient
+                    );
 
             tvIngredientName =
                     itemView.findViewById(
@@ -339,6 +459,11 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
             tvExpiryDate =
                     itemView.findViewById(
                             R.id.tvExpiryDate
+                    );
+
+            tvExpiryStatus =
+                    itemView.findViewById(
+                            R.id.tvExpiryStatus
                     );
         }
     }

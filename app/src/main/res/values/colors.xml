@@ -1,5 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Core -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Smart Pantry pastel purple palette -->
+    <color name="purple_primary">#8E7AB5</color>
+    <color name="purple_primary_dark">#6F5C99</color>
+    <color name="purple_light">#D9CFF0</color>
+    <color name="purple_extra_light">#F3EEFA</color>
+
+    <!-- Backgrounds -->
+    <color name="background_main">#F8F6FC</color>
+    <color name="surface_card">#FFFFFFFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#2F2A36</color>
+    <color name="text_secondary">#746E7C</color>
+
+    <!-- Status colours -->
+    <color name="status_fresh">#4E8B72</color>
+    <color name="status_warning">#C28B3C</color>
+    <color name="status_expired">#B85C5C</color>
+
+    <!-- Borders / dividers -->
+    <color name="border_soft">#E5DFF0</color>
+
 </resources>

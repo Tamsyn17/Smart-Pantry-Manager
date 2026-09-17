@@ -1,5 +1,6 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -24,16 +25,64 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_suggested_recipes);
 
-        recyclerViewRecipes = findViewById(R.id.recyclerViewRecipes);
-        tvEmptyRecipes = findViewById(R.id.tvEmptyRecipes);
+        recyclerViewRecipes =
+                findViewById(R.id.recyclerViewRecipes);
 
-        databaseHelper = new DatabaseHelper(this);
+        tvEmptyRecipes =
+                findViewById(R.id.tvEmptyRecipes);
+
+        TextView tvBottomPantry =
+                findViewById(R.id.tvBottomPantry);
+
+        TextView tvBottomSettings =
+                findViewById(R.id.tvBottomSettings);
+
+        databaseHelper =
+                new DatabaseHelper(this);
 
         recyclerViewRecipes.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
+        // Bottom navigation - Pantry
+        tvBottomPantry.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            SuggestedRecipesActivity.this,
+                            MainActivity.class
+                    );
+
+            intent.addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP
+            );
+
+            startActivity(intent);
+            finish();
+        });
+
+        // Bottom navigation - Settings
+        tvBottomSettings.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            SuggestedRecipesActivity.this,
+                            SettingsActivity.class
+                    );
+
+            startActivity(intent);
+        });
+
         loadSuggestedRecipes();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (databaseHelper != null) {
+            loadSuggestedRecipes();
+        }
     }
 
     private void loadSuggestedRecipes() {
@@ -49,26 +98,43 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
 
         for (Recipe recipe : allRecipes) {
 
-            if (canMakeRecipe(recipe, pantryItems)) {
+            if (canMakeRecipe(
+                    recipe,
+                    pantryItems)) {
+
                 suggestedRecipes.add(recipe);
             }
         }
 
         if (suggestedRecipes.isEmpty()) {
 
-            recyclerViewRecipes.setVisibility(View.GONE);
-            tvEmptyRecipes.setVisibility(View.VISIBLE);
+            recyclerViewRecipes.setVisibility(
+                    View.GONE
+            );
+
+            tvEmptyRecipes.setVisibility(
+                    View.VISIBLE
+            );
 
         } else {
 
-            recyclerViewRecipes.setVisibility(View.VISIBLE);
-            tvEmptyRecipes.setVisibility(View.GONE);
+            recyclerViewRecipes.setVisibility(
+                    View.VISIBLE
+            );
+
+            tvEmptyRecipes.setVisibility(
+                    View.GONE
+            );
         }
 
         recipeAdapter =
-                new RecipeAdapter(suggestedRecipes);
+                new RecipeAdapter(
+                        suggestedRecipes
+                );
 
-        recyclerViewRecipes.setAdapter(recipeAdapter);
+        recyclerViewRecipes.setAdapter(
+                recipeAdapter
+        );
     }
 
     private boolean canMakeRecipe(
@@ -76,13 +142,18 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
             List<PantryItem> pantryItems) {
 
         List<RecipeIngredient> requiredIngredients =
-                databaseHelper.getIngredientsForRecipe(
-                        recipe.getId()
-                );
+                databaseHelper
+                        .getIngredientsForRecipe(
+                                recipe.getId()
+                        );
 
-        for (RecipeIngredient required : requiredIngredients) {
+        for (RecipeIngredient required
+                : requiredIngredients) {
 
-            if (!hasRequiredIngredient(required, pantryItems)) {
+            if (!hasRequiredIngredient(
+                    required,
+                    pantryItems)) {
+
                 return false;
             }
         }
@@ -95,10 +166,14 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
             List<PantryItem> pantryItems) {
 
         String requiredUnit =
-                normalizeUnit(required.getUnit());
+                normalizeUnit(
+                        required.getUnit()
+                );
 
         String requiredUnitType =
-                getUnitType(requiredUnit);
+                getUnitType(
+                        requiredUnit
+                );
 
         double requiredQuantity =
                 convertToBaseUnit(
@@ -108,7 +183,8 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
 
         double totalAvailableQuantity = 0;
 
-        for (PantryItem pantryItem : pantryItems) {
+        for (PantryItem pantryItem
+                : pantryItems) {
 
             if (!ingredientNamesMatch(
                     required.getIngredientName(),
@@ -118,12 +194,18 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
             }
 
             String pantryUnit =
-                    normalizeUnit(pantryItem.getUnit());
+                    normalizeUnit(
+                            pantryItem.getUnit()
+                    );
 
             String pantryUnitType =
-                    getUnitType(pantryUnit);
+                    getUnitType(
+                            pantryUnit
+                    );
 
-            if (!requiredUnitType.equals(pantryUnitType)) {
+            if (!requiredUnitType.equals(
+                    pantryUnitType)) {
+
                 continue;
             }
 
@@ -133,10 +215,12 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
                             pantryUnit
                     );
 
-            totalAvailableQuantity += pantryQuantity;
+            totalAvailableQuantity +=
+                    pantryQuantity;
         }
 
-        return totalAvailableQuantity >= requiredQuantity;
+        return totalAvailableQuantity
+                >= requiredQuantity;
     }
 
     private boolean ingredientNamesMatch(
@@ -144,15 +228,22 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
             String pantryIngredient) {
 
         String recipeName =
-                normalizeIngredientName(recipeIngredient);
+                normalizeIngredientName(
+                        recipeIngredient
+                );
 
         String pantryName =
-                normalizeIngredientName(pantryIngredient);
+                normalizeIngredientName(
+                        pantryIngredient
+                );
 
-        return recipeName.equals(pantryName);
+        return recipeName.equals(
+                pantryName
+        );
     }
 
-    private String normalizeIngredientName(String name) {
+    private String normalizeIngredientName(
+            String name) {
 
         if (name == null) {
             return "";
@@ -208,14 +299,16 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         return normalized;
     }
 
-    private String normalizeUnit(String unit) {
+    private String normalizeUnit(
+            String unit) {
 
         if (unit == null) {
             return "";
         }
 
         String normalized =
-                unit.trim().toLowerCase(Locale.ROOT);
+                unit.trim()
+                        .toLowerCase(Locale.ROOT);
 
         switch (normalized) {
 
@@ -280,7 +373,8 @@ public class SuggestedRecipesActivity extends AppCompatActivity {
         }
     }
 
-    private String getUnitType(String unit) {
+    private String getUnitType(
+            String unit) {
 
         switch (unit) {
 
